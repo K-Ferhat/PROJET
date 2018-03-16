@@ -13,29 +13,68 @@ unsigned char * read_grayscale(char *fname, int *dimx, int *dimy)
 
     image = (Imlib_Image *)imlib_load_image(fname);
     if(image)
-    {
-        unsigned char *buf, *data;
-        int l,c;
+		{
+			unsigned char *buf, *data;
+			int l,c;
 
-        imlib_context_set_image( image);
-        *dimx = imlib_image_get_width();
-        *dimy = imlib_image_get_height();
-        data  = (unsigned char *)imlib_image_get_data();
-        buf = (unsigned char*) malloc(sizeof(char)**dimx**dimy);
-        for(l=0;l<*dimy;l++)
-	  for(c=0;c<*dimx;c++)
-            {
-                *buf++ = (*data + *(data+1) + *(data+2))/3;
-                data += 4;
-            }
-        imlib_free_image();
-        return buf-*dimx**dimy;
-    }
+			imlib_context_set_image( image);
+			*dimx = imlib_image_get_width();
+			*dimy = imlib_image_get_height();
+			data  = (unsigned char *)imlib_image_get_data();
+			buf = (unsigned char*) malloc(sizeof(char)**dimx**dimy);
+			for(l=0;l<*dimy;l++)
+				for(c=0;c<*dimx;c++)
+					{
+						*buf++ = (*data + *(data+1) + *(data+2))/3;
+						data += 4;
+					}
+			imlib_free_image();
+			return buf-*dimx**dimy;
+		}
     else
-    {
-        fprintf( stderr, "Erreur: image %s n'a pu etre ouverte.\n", fname);
-        exit(33);
-    }
+		{
+			fprintf( stderr, "Erreur: image %s n'a pu etre ouverte.\n", fname);
+			exit(33);
+		}
+}
+
+void read_color(char *fname, int *dimx, int *dimy, unsigned char *r, unsigned char *v, unsigned char *b)
+{
+    Imlib_Image *image;
+
+    image = (Imlib_Image *)imlib_load_image(fname);
+    if(image)
+		{
+			unsigned char *data, *r, *v, *b;
+			int l,c;
+
+			imlib_context_set_image( image);
+			*dimx = imlib_image_get_width();
+			*dimy = imlib_image_get_height();
+			data  = (unsigned char *)imlib_image_get_data();
+
+			r = (unsigned char *)malloc(sizeof(unsigned char) * *dimx * *dimy);
+			v = (unsigned char *)malloc(sizeof(unsigned char) * *dimx * *dimy);
+			b = (unsigned char *)malloc(sizeof(unsigned char) * *dimx * *dimy);
+			
+			for(l=0;l<*dimy;l++)
+				for(c=0;c<*dimx;c++)
+					{
+						*r++ = *data;
+						*v++ = *(data+1);
+						*b++ = *(data+2);
+						data += 4;
+					}
+			imlib_free_image();
+			r -= *dimx**dimy;
+			v -= *dimx**dimy;
+			b -= *dimx**dimy; 
+		}
+    else
+		{
+			fprintf( stderr, "Erreur: image %s n'a pu etre ouverte.\n", fname);
+			exit(33);
+		}
 }
 
 /*
@@ -52,21 +91,53 @@ void write_grayscale(char *fname, int dimx, int dimy, unsigned char *buf)
     char *ext;
 
     if( !(ext = strchr( fname, '.')))
-    {
-        fprintf( stderr, "Erreur: format image non reconnu\n");
-        exit(34);
-    }
+		{
+			fprintf( stderr, "Erreur: format image non reconnu\n");
+			exit(34);
+		}
 
     data = (unsigned char *)malloc(sizeof(char)*dimx*dimy*4);
     for( l=0; l<dimy; l++)
-      for( c=0; c<dimx; c++)
-        {
-            *data = *buf;
-            *(data+1)= *buf;
-            *(data+2) = *buf;
-            *(data+3) = 0;
-            buf ++; data += 4;
-        }
+		for( c=0; c<dimx; c++)
+			{
+				*data = *buf;
+				*(data+1)= *buf;
+				*(data+2) = *buf;
+				*(data+3) = 0;
+				buf ++; data += 4;
+			}
+    data -= dimx*dimy*4;
+    image = (Imlib_Image *)imlib_create_image_using_data( dimx, dimy, (DATA32*)data);
+    imlib_context_set_image( image);
+    imlib_image_set_format(ext+1);
+    imlib_save_image( fname);
+    imlib_free_image();
+    free( data);
+}
+
+void write_color(char *fname, int dimx, int dimy, unsigned char *r, unsigned char *v, unsigned char *b)
+{
+    Imlib_Image *image;
+    unsigned char *data;
+    int l, c;
+    char *ext;
+
+    if( !(ext = strchr( fname, '.')))
+		{
+			fprintf( stderr, "Erreur: format image non reconnu\n");
+			exit(34);
+		}
+
+    data = (unsigned char *)malloc(sizeof(char)*dimx*dimy*4);
+    for( l=0; l<dimy; l++)
+		for( c=0; c<dimx; c++)
+			{
+				*data = *r;
+				*(data+1) = *v;
+				*(data+2) = *b;
+				*(data+3) = 0;
+				r ++; v ++; b ++; data += 4;
+			}
     data -= dimx*dimy*4;
     image = (Imlib_Image *)imlib_create_image_using_data( dimx, dimy, (DATA32*)data);
     imlib_context_set_image( image);
@@ -89,7 +160,7 @@ int main(int argc, char **argv){
     double seuil;
     if(argc > 3)
 		{
-			unsigned char *buf_in, *buf_out;
+			unsigned char *r, *v, *b, *r_shifted, *v_shifted, *b_shifted;
 			int dimx, dimy; /* nombre de colonnes, de lignes de l'image */
 			int x, y;
 			
@@ -99,19 +170,26 @@ int main(int argc, char **argv){
 			seuil = atof(argv[3]);
 			
 			/* lecture image */
-			buf_in = read_grayscale(inName, &dimx, &dimy);
-			write_grayscale("original_dot_set.jpg", dimx, dimy, buf_in);
+			read_color(inName, &dimx, &dimy, r, v, b);
+	   
 			/* traitement sur l'image */
-			buf_out = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
+			r_shifted = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
+			v_shifted = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
+			b_shifted = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
 
-			printf("Avant compute mean shift\n");
-			compute_mean_shift(buf_in, buf_out, dimx* dimy,100);
-			printf("Après compute mean shift\n");
-			/* ecriture image */
-			write_grayscale(outName, dimx, dimy, buf_out);
+			compute_mean_shift(r, r_shifted, dimx* dimy, 100);
+			compute_mean_shift(v, v_shifted, dimx* dimy, 100);
+			compute_mean_shift(b, b_shifted, dimx* dimy, 100);
 			
-			free(buf_in);
-			free(buf_out);
+			/* ecriture image */
+			write_color(outName, dimx, dimy, r_shifted, v_shifted, b_shifted);
+			
+			free(r);
+			free(v);
+			free(b);
+			free(r_shifted);
+			free(v_shifted);
+			free(b_shifted);
 		}
     else
         printf("Usage: %s image-in image-out seuil\n", *argv);
