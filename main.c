@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <Imlib2.h>
 #include <string.h>
-#include "/home/julie/Documents/Git_Projet/imageprojects/imlib/imlib.h"
+#include "./imageprojects/imlib/imlib.h"
 
 void compute_mean_shift(unsigned char *original_dot_set, unsigned char *shifted_dot_set, unsigned int cardinal, unsigned char h);
 

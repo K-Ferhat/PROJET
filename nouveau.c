@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "/home/julie/Documents/Git_Projet/imageprojects/imlib/imlib.h"
+#include "./imageprojects/imlib/imlib.h"
 
 double kernel(double x){
   if(x<=1)
