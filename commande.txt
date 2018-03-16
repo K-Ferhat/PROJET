@@ -1,4 +1,3 @@
-
 git fetch
 git rebase //ce qui est different, là où il y a les conflits
 git log //affiche tout l'historique -n si on veut les n dernier
