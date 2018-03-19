@@ -1,4 +1,4 @@
-all: one_dim_color three_dim_color exec_one_dim_color
+all: one_dim_color three_dim_color exec_one_dim_color exec_three_dim_color
 
 one_dim_color: mean_shift.c one_dim_color.c
 	gcc -lm -g -o ex_one_dim_color mean_shift.c one_dim_color.c `imlib2-config --cflags --libs`

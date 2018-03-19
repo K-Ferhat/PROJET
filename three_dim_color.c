@@ -38,14 +38,14 @@ unsigned char * read_grayscale(char *fname, int *dimx, int *dimy)
 		}
 }
 
-void read_color(char *fname, int *dimx, int *dimy, unsigned char *r, unsigned char *v, unsigned char *b)
+void read_color(char *fname, int *dimx, int *dimy, unsigned char **r, unsigned char **v, unsigned char **b)
 {
     Imlib_Image *image;
 
     image = (Imlib_Image *)imlib_load_image(fname);
     if(image)
 		{
-			unsigned char *data, *r, *v, *b;
+			unsigned char *data;
 			int l,c;
 
 			imlib_context_set_image( image);
@@ -53,22 +53,25 @@ void read_color(char *fname, int *dimx, int *dimy, unsigned char *r, unsigned ch
 			*dimy = imlib_image_get_height();
 			data  = (unsigned char *)imlib_image_get_data();
 
-			r = (unsigned char *)malloc(sizeof(unsigned char) * *dimx * *dimy);
-			v = (unsigned char *)malloc(sizeof(unsigned char) * *dimx * *dimy);
-			b = (unsigned char *)malloc(sizeof(unsigned char) * *dimx * *dimy);
+			*r = (unsigned char *)malloc(sizeof(unsigned char) * *dimx * *dimy);
+			*v = (unsigned char *)malloc(sizeof(unsigned char) * *dimx * *dimy);
+			*b = (unsigned char *)malloc(sizeof(unsigned char) * *dimx * *dimy);
 			
 			for(l=0;l<*dimy;l++)
 				for(c=0;c<*dimx;c++)
 					{
-						*r++ = *data;
-						*v++ = *(data+1);
-						*b++ = *(data+2);
+						**r = *data;
+						(*r)++;
+						**v = *(data+1);
+						(*v)++;
+						**b = *(data+2);
+						(*b)++;
 						data += 4;
 					}
 			imlib_free_image();
-			r -= *dimx**dimy;
-			v -= *dimx**dimy;
-			b -= *dimx**dimy; 
+			*r -= *dimx**dimy;
+			*v -= *dimx**dimy;
+			*b -= *dimx**dimy; 
 		}
     else
 		{
@@ -170,8 +173,12 @@ int main(int argc, char **argv){
 			seuil = atof(argv[3]);
 			
 			/* lecture image */
-			read_color(inName, &dimx, &dimy, r, v, b);
-	   
+			read_color(inName, &dimx, &dimy, &r, &v, &b);
+
+			write_grayscale("rouge.jpg", dimx, dimy, r);
+			write_grayscale("vert.jpg", dimx, dimy, v);
+			write_grayscale("bleue.jpg", dimx, dimy, b);
+			
 			/* traitement sur l'image */
 			r_shifted = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
 			v_shifted = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
