@@ -105,7 +105,7 @@ int main(int argc, char **argv){
 			buf_out = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
 
 			printf("Avant compute mean shift\n");
-			compute_mean_shift(buf_in, buf_out, dimx* dimy,100);
+			compute_mean_shift(buf_in, buf_out, dimx* dimy,40);
 			printf("Après compute mean shift\n");
 			/* ecriture image */
 			write_grayscale(outName, dimx, dimy, buf_out);

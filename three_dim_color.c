@@ -184,9 +184,9 @@ int main(int argc, char **argv){
 			v_shifted = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
 			b_shifted = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
 
-			compute_mean_shift(r, r_shifted, dimx* dimy, 100);
-			compute_mean_shift(v, v_shifted, dimx* dimy, 100);
-			compute_mean_shift(b, b_shifted, dimx* dimy, 100);
+			compute_mean_shift(r, r_shifted, dimx* dimy, 40);
+			compute_mean_shift(v, v_shifted, dimx* dimy, 40);
+			compute_mean_shift(b, b_shifted, dimx* dimy, 40);
 			
 			/* ecriture image */
 			write_color(outName, dimx, dimy, r_shifted, v_shifted, b_shifted);

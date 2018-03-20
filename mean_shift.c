@@ -46,10 +46,10 @@ void mean_shift(unsigned char *original_dot_set, unsigned int *shifted_hist,  un
 		printf("-");
 		/*i represente xi*/
 		for(i = 1; i <= 255; i++){
-			//numerator += hist[i] * i * (-1.0)  * derivee_kernel(((val-i)/h)*(val-i)/h);
-			//scale_factor += hist[i] * (-1.0) * derivee_kernel(((val-i)/h)*(val-i)/h);
-			numerator += hist[i] * i * kernel(((val-i)/h)*(val-i)/h);
-			scale_factor += hist[i] * kernel(((val-i)/h)*(val-i)/h); 
+		  numerator += hist[i] * i * derivee_kernel(((val-i)/h)*(val-i)/h);
+		  scale_factor += hist[i] * derivee_kernel(((val-i)/h)*(val-i)/h);
+		  /* numerator += hist[i] * i * kernel(((val-i)/h)*(val-i)/h); */
+		  /* scale_factor += hist[i] * kernel(((val-i)/h)*(val-i)/h);  */
 		}
     
 		error = shifted_hist[val];
