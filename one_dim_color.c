@@ -5,7 +5,7 @@
 #include <string.h>
 #include "imlib.h"
 
-void compute_mean_shift(unsigned char *original_dot_set, unsigned char *shifted_dot_set, unsigned int cardinal, unsigned char h);
+void compute_mean_shift(unsigned char *original_dot_set, unsigned char *shifted_dot_set, unsigned int cardinal, double h);
 
 unsigned char * read_grayscale(char *fname, int *dimx, int *dimy)
 {
@@ -86,17 +86,16 @@ void process_image();
 
 int main(int argc, char **argv){
 	char *inName, *outName;
-    double seuil;
+    double h;
     if(argc > 3)
 		{
 			unsigned char *buf_in, *buf_out;
 			int dimx, dimy; /* nombre de colonnes, de lignes de l'image */
-			int x, y;
 			
 			/* parametres de la commande */
 			inName=argv[1];
 			outName=argv[2];
-			seuil = atof(argv[3]);
+			h = atof(argv[3]);
 			
 			/* lecture image */
 			buf_in = read_grayscale(inName, &dimx, &dimy);
@@ -105,7 +104,7 @@ int main(int argc, char **argv){
 			buf_out = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
 
 			printf("Avant compute mean shift\n");
-			compute_mean_shift(buf_in, buf_out, dimx* dimy,40);
+			compute_mean_shift(buf_in, buf_out, dimx* dimy,h);
 			printf("Après compute mean shift\n");
 			/* ecriture image */
 			write_grayscale(outName, dimx, dimy, buf_out);
@@ -113,8 +112,9 @@ int main(int argc, char **argv){
 			free(buf_in);
 			free(buf_out);
 		}
-    else
+    else{
         printf("Usage: %s image-in image-out seuil\n", *argv);
+	}
 	
 	return 0;
 }
