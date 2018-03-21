@@ -8,35 +8,63 @@
 
 
 int main(int argc, char **argv){
-	char *inName, *outName;
-    double h;
-    if(argc > 3)
-		{
-			unsigned char *buf_in, *buf_out;
-			int dimx, dimy; /* nombre de colonnes, de lignes de l'image */
-			
-			/* parametres de la commande */
-			inName=argv[1];
-			outName=argv[2];
-			h = atof(argv[3]);
-			
-			/* lecture image */
-			buf_in = read_grayscale(inName, &dimx, &dimy);
-			write_grayscale("original_dot_set.jpg", dimx, dimy, buf_in);
-			/* traitement sur l'image */
-			buf_out = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
-
-			compute_mean_shift(buf_in, buf_out, dimx* dimy,h);
-
-			/* ecriture image */
-			write_grayscale(outName, dimx, dimy, buf_out);
-			
-			free(buf_in);
-			free(buf_out);
-		}
-    else{
-        printf("Usage: %s image-in image-out seuil\n", *argv);
-	}
+	char *arg;
+	char *param;
 	
+	double h = 20.0;
+	char *inName = NULL, *outName = NULL;
+
+	/* Parse command line arguments */
+	if(argc > 1){
+		for(int i = 1; i < argc; i++) {
+			arg = argv[i];
+			param = NULL;
+
+			if(arg[0] == '-' && i+1 < argc)
+				param = argv[i+1];
+
+			if((strcmp("-input", arg) == 0 || strcmp("-in", arg) == 0) && param != NULL) {
+				i++;
+				inName = param;
+			}
+			else if((strcmp("-output", arg) == 0 || strcmp("-out", arg) == 0) && param != NULL) {
+				i++;
+				outName = param;
+			}
+			else if((strcmp("-bandwidth", arg) == 0 || strcmp("-h", arg) == 0) && param != NULL) {
+				i++;
+				h = atof(param);
+			}
+		}
+
+	}
+
+	else{
+		fprintf(stderr, "Run default execution : h=20, inName=\"olena.jpg\", outName=\"one_dim_color.jpg\"\n\nUsage :\n\t-input / -in : input file\n\t-output / -out : output file\n\t-bandwidth / -h : set h parameter\n");
+	}
+
+
+	
+	unsigned char *buf_in, *buf_out;
+	int dimx, dimy; /* nombre de colonnes, de lignes de l'image */
+	
+	/* lecture image */
+	if(inName == NULL) buf_in = read_grayscale("olena.jpg", &dimx, &dimy);
+	else buf_in = read_grayscale(inName, &dimx, &dimy);
+
+	write_grayscale("original_dot_set.jpg", dimx, dimy, buf_in);
+
+	/* traitement sur l'image */
+	buf_out = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
+
+	compute_mean_shift(buf_in, buf_out, dimx * dimy, h);
+
+	/* ecriture image */
+	if (outName == NULL) write_grayscale("one_dim_color.jpg", dimx, dimy, buf_out);
+	else write_grayscale(outName, dimx, dimy, buf_out);
+			
+	free(buf_in);
+	free(buf_out);
+    
 	return 0;
 }
