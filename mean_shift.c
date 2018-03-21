@@ -3,65 +3,56 @@
 #include <math.h>
 #include "imlib.h"
 
-double kernel(double x){
-	if(x<=1)
-		return 1.5*(1.0-x*x);
-	return 0.0;
-}
-
-double derivee_kernel(double x){
+static double derivee_kernel(double x){
 	if(x <= 1)
 		return -3.0*x;
 	return 0.0;
 }
 
 
-void build_histogram(unsigned char *original_dot_set, unsigned int cardinal, unsigned int *hist){
-
+static void build_histogram(unsigned char *original_dot_set, unsigned int cardinal, unsigned int *hist){
 	unsigned int i;
 
-	/*Initialisation du tableau a 0 pour les ++ d'apres*/
 	for(i = 0; i < 256; i++){
 		hist[i] = 0;
 	}
 
-	/*pour chaque valeur de pixel on ajoute 1 dans la case correspondante*/
+	/* Dans la i eme case du tableau, on indique le nombre de pixels a i */
 	for(i = 0; i < cardinal; i++){
 		hist[original_dot_set[i]]++;
 	}
-
 }
 
-/* val c'est la valeur du pixel qu'on veut faire converger, h c'est la bande passante*/
-void mean_shift(unsigned char *original_dot_set, double *shifted_hist,  unsigned int cardinal, double h, unsigned int val, unsigned int *hist){
 
-	double scale_factor = 0.0;/*den*/
+static void mean_shift(unsigned char *original_dot_set, double *shifted_hist,  unsigned int cardinal, double h, unsigned int val, unsigned int *hist){
+
+	double scale_factor = 0.0;
 	double numerator = 0.0;
-	int i;
+	unsigned int i;
 	double error = 1.0;
+	unsigned int step = 0;
+	double kernel_argument;
 	shifted_hist[val] = (double)val;
 
 
 	while(error > 0.001){
-		printf(".");
-		/*i represente xi*/
+		step ++;
+		
 		for(i = 0; i <= 255; i++){
-			numerator -= (double)hist[i] * (double)i * derivee_kernel(((shifted_hist[val]-(double)i)/h)*(shifted_hist[val]-(double)i)/h);
+			kernel_argument = ((shifted_hist[val]-(double)i)*(shifted_hist[val]-(double)i))/(h*h);
 			
-			scale_factor -= (double)hist[i] * derivee_kernel(((shifted_hist[val]-(double)i)/h)*(shifted_hist[val]-(double)i)/h);
-		  /* numerator += hist[i] * i * kernel(((val-i)/h)*(val-i)/h); */
-		  /* scale_factor += hist[i] * kernel(((val-i)/h)*(val-i)/h);  */
+			numerator -= (double)hist[i] * (double)i * derivee_kernel(kernel_argument);
+			scale_factor -= (double)hist[i] * derivee_kernel(kernel_argument);
 		}
     
-		error = shifted_hist[val];
+		error = shifted_hist[val]; /* old value */
 
 		shifted_hist[val] = numerator / scale_factor;
 
-		error -= shifted_hist[val];
-		if(error < 0) error = -error;	
-		/* printf("error=%lf", error); */
+		error -= shifted_hist[val]; /* old value - new value */
+		if(error < 0) error = -error;
 	}
-	printf("\n");
+	printf("The value [%d] needed %d steps to converge to %.3lf\n", val, step, shifted_hist[val]);
 }
 
 
@@ -70,34 +61,29 @@ void compute_mean_shift(unsigned char *original_dot_set, unsigned char *shifted_
 	unsigned int *hist = malloc(sizeof(unsigned int) * 256);
 	double *shifted_hist = malloc(sizeof(double) * 256);
 
-	/*construction de l'histogramme*/
 	build_histogram(original_dot_set, cardinal, hist);
 
-	/*application du mean shift sur chaque valeur de l'histogramme*/
+	/*Application du mean shift sur chaque valeur de l'histogramme*/
 	for(i = 0; i < 256; i++){
 		mean_shift(original_dot_set, shifted_hist, cardinal, h, i, hist);
 	}
 
-	printf("VALEUR DE L'HISTOGRAMME\n");
+	/* Print input histogramme */
+	puts("\n\nInput histogramme");
 	for(i = 0; i < 256; i++){
 		printf("%d ", hist[i]);
 	}
-	putchar('\n');
-  
-	printf("VALEUR DE SHIFTED HIST\n");
-	for(i = 0; i < 256; i++){
-		printf("%.3lf ", shifted_hist[i]);
-	}
-	putchar('\n');
-  
+
+	/* Build the final set */
 	for(i = 0; i < cardinal; i++){
 		shifted_dot_set[i] = (unsigned int)shifted_hist[original_dot_set[i]];
 	}
+
+	/* Print output histogramme */
 	build_histogram(shifted_dot_set, cardinal, hist);
-    printf("VALEUR DE L'HISTOGRAMME\n");
+    printf("\n\nOutput histogramme\n");
 	for(i = 0; i < 256; i++){
 		printf("%d ", hist[i]);
 	}
 	putchar('\n');
-  
 }

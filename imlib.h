@@ -23,10 +23,3 @@
 unsigned char * read_grayscale(char *fname, int *dimx, int *dimy);
 
 void write_grayscale(char *fname, int dimx, int dimy, unsigned char *buf);
-
-void process_image();
-
-
-void process_image (unsigned char *buf_out, unsigned char *buf_in, int dimx, int dimy, double seuil);
-
-void write_color(char *fname, int dimx, int dimy, unsigned char *R, unsigned char *G, unsigned char *B);
