@@ -1,6 +1,0 @@
-git fetch
-git rebase //ce qui est different, là où il y a les conflits
-git log //affiche tout l'historique -n si on veut les n dernier
-peut etre refaire des git add et des git commit
-git add //index les modifications
-git push origin master 
