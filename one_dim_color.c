@@ -13,7 +13,13 @@ double radially_symetric_der(double x){
 	return 0.0;
 }
 
+/* A implementer */
 double gaussian_der(double x){
+	if(x <= 1)
+		return -3.0*x;
+	return 0.0;
+}
+double epanechnikov_der(double x){
 	if(x <= 1)
 		return -3.0*x;
 	return 0.0;
@@ -53,6 +59,7 @@ int main(int argc, char **argv){
 				i++;
 				if(strcmp("radially_symmetric", param) == 0)  kernel_function = radially_symetric_der ;
 				if(strcmp("gaussian", param) == 0) kernel_function = gaussian_der;
+				if(strcmp("epanechnikov", param) == 0) kernel_function = epanechnikov_der;
 			}
 		}
 
