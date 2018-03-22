@@ -3,13 +3,6 @@
 #include <math.h>
 #include "imlib.h"
 
-static double derivee_kernel(double x){
-	if(x <= 1)
-		return -3.0*x;
-	return 0.0;
-}
-
-
 static void build_histogram(unsigned char *original_dot_set, unsigned int cardinal, unsigned int *hist){
 	unsigned int i;
 
@@ -24,7 +17,7 @@ static void build_histogram(unsigned char *original_dot_set, unsigned int cardin
 }
 
 
-static void mean_shift(unsigned char *original_dot_set, double *shifted_hist,  unsigned int cardinal, double h, unsigned int val, unsigned int *hist){
+static void mean_shift(unsigned char *original_dot_set, double *shifted_hist,  unsigned int cardinal, double h, unsigned int val, unsigned int *hist, double (*kernel_function)(double x)){
 
 	double scale_factor = 0.0;
 	double numerator = 0.0;
@@ -41,8 +34,8 @@ static void mean_shift(unsigned char *original_dot_set, double *shifted_hist,  u
 		for(i = 0; i <= 255; i++){
 			kernel_argument = ((shifted_hist[val]-(double)i)*(shifted_hist[val]-(double)i))/(h*h);
 			
-			numerator -= (double)hist[i] * (double)i * derivee_kernel(kernel_argument);
-			scale_factor -= (double)hist[i] * derivee_kernel(kernel_argument);
+			numerator -= (double)hist[i] * (double)i * (*kernel_function)(kernel_argument);
+			scale_factor -= (double)hist[i] * (*kernel_function)(kernel_argument);
 		}
     
 		error = shifted_hist[val]; /* old value */
@@ -56,7 +49,7 @@ static void mean_shift(unsigned char *original_dot_set, double *shifted_hist,  u
 }
 
 
-void compute_mean_shift(unsigned char *original_dot_set, unsigned char *shifted_dot_set, unsigned int cardinal, double h){
+void compute_mean_shift(unsigned char *original_dot_set, unsigned char *shifted_dot_set, unsigned int cardinal, double h, double (*kernel_function)(double x)){
 	unsigned int i;
 	unsigned int *hist = malloc(sizeof(unsigned int) * 256);
 	double *shifted_hist = malloc(sizeof(double) * 256);
@@ -65,7 +58,7 @@ void compute_mean_shift(unsigned char *original_dot_set, unsigned char *shifted_
 
 	/*Application du mean shift sur chaque valeur de l'histogramme*/
 	for(i = 0; i < 256; i++){
-		mean_shift(original_dot_set, shifted_hist, cardinal, h, i, hist);
+		mean_shift(original_dot_set, shifted_hist, cardinal, h, i, hist, kernel_function);
 	}
 
 	/* Print input histogramme */
