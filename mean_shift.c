@@ -53,7 +53,14 @@ void compute_mean_shift(unsigned char *original_dot_set, unsigned char *shifted_
 	unsigned int i;
 	unsigned int *hist = malloc(sizeof(unsigned int) * 256);
 	double *shifted_hist = malloc(sizeof(double) * 256);
-
+	
+	FILE *input_hist = fopen("hist/input_hist.data", "w");
+	FILE *output_hist = fopen("hist/output_hist.data", "w");
+	if(!input_hist || !output_hist){
+		fprintf(stderr, "Error, files not loaded\n");
+		return;
+	}
+	
 	build_histogram(original_dot_set, cardinal, hist);
 
 	/*Application du mean shift sur chaque valeur de l'histogramme*/
@@ -65,6 +72,7 @@ void compute_mean_shift(unsigned char *original_dot_set, unsigned char *shifted_
 	puts("\n\nInput histogramme");
 	for(i = 0; i < 256; i++){
 		printf("%d ", hist[i]);
+		fprintf(input_hist, "%hhu %d\n", i, hist[i]);
 	}
 
 	/* Build the final set */
@@ -77,6 +85,10 @@ void compute_mean_shift(unsigned char *original_dot_set, unsigned char *shifted_
     printf("\n\nOutput histogramme\n");
 	for(i = 0; i < 256; i++){
 		printf("%d ", hist[i]);
+		fprintf(output_hist, "%hhu %d\n", i, hist[i]);
 	}
 	putchar('\n');
+
+	fclose(input_hist);
+	fclose(output_hist);
 }
