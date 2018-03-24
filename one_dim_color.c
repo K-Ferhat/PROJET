@@ -78,7 +78,7 @@ int main(int argc, char **argv){
 	if(inName == NULL) buf_in = read_grayscale("olena.jpg", &dimx, &dimy);
 	else buf_in = read_grayscale(inName, &dimx, &dimy);
 
-	write_grayscale("original_dot_set.jpg", dimx, dimy, buf_in);
+	//write_grayscale("original_dot_set.jpg", dimx, dimy, buf_in);
 
 	/* traitement sur l'image */
 	buf_out = (unsigned char *)malloc(sizeof(unsigned char)*dimx*dimy);
