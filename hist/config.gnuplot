@@ -22,7 +22,6 @@ set output "hist/compare.jpg"
 set multiplot layout 2, 1 title "Input vs outut histogram" 
 
 set lmargin 12
-unset xtics
 unset title
 
 unset xlabel
